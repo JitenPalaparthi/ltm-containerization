@@ -14,3 +14,11 @@ kubectl apply -f node-demo-pod.yaml
 
 kubectl get all -A
 
+kubectl apply -f dev-ns.yaml
+
+kubectl apply -f node-demo-deployment.yaml
+
+kubectl apply -f node-demo-service.yaml
+
+kubectl get all -n dev
+
