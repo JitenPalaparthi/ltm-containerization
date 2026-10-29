@@ -22,3 +22,5 @@ kubectl apply -f node-demo-service.yaml
 
 kubectl get all -n dev
 
+kubectl scale deployment node-demo --replicas=20 -n dev
+
