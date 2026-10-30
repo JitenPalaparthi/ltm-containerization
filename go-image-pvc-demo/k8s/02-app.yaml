@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-uploader
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: image-uploader
+  template:
+    metadata:
+      labels:
+        app: image-uploader
+    spec:
+      securityContext:
+        fsGroup: 10001
+      containers:
+        - name: image-uploader
+          image: jpalaparthi/go-image-pvc-demo:v1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: 32Mi
+              cpu: 50m
+            limits:
+              memory: 128Mi
+              cpu: 500m
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 1
+            periodSeconds: 5
+          volumeMounts:
+            - name: images
+              mountPath: /data/images
+      volumes:
+        - name: images
+          persistentVolumeClaim:
+            claimName: images-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-uploader
+spec:
+  selector:
+    app: image-uploader
+  ports:
+    - port: 80
+      targetPort: 8080

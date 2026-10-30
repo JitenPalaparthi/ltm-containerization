@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: go-oom-demo:v1
+          image: jpalaparthi/go-oom-demo:v1
           imagePullPolicy: Never
           env:
             - name: TARGET_MIB
