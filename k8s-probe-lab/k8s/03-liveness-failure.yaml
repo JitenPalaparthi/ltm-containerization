@@ -1,0 +1,30 @@
+# Scenario C: liveness endpoint fails after 20s -> kubelet restarts container.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: liveness-failure
+  namespace: probe-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: liveness-failure}
+  template:
+    metadata:
+      labels: {app: liveness-failure}
+    spec:
+      containers:
+        - name: app
+          image: jpalaparthi/go-probe-lab:v1
+          imagePullPolicy: IfNotPresent
+          env:
+            - {name: STARTUP_SECONDS, value: "2"}
+            - {name: READY_AFTER_SECONDS, value: "2"}
+            - {name: FAIL_AFTER_SECONDS, value: "20"}
+          startupProbe:
+            httpGet: {path: /startup, port: 8080}
+            periodSeconds: 3
+            failureThreshold: 10
+          livenessProbe:
+            httpGet: {path: /live, port: 8080}
+            periodSeconds: 5
+            failureThreshold: 2

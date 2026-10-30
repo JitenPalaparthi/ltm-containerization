@@ -1,0 +1,20 @@
+# Scenario D: app itself exits with code 1 after 15s.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-crash
+  namespace: probe-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: app-crash}
+  template:
+    metadata:
+      labels: {app: app-crash}
+    spec:
+      containers:
+        - name: app
+          image: jpalaparthi/go-probe-lab:v1
+          imagePullPolicy: IfNotPresent
+          env:
+            - {name: CRASH_AFTER_SECONDS, value: "15"}

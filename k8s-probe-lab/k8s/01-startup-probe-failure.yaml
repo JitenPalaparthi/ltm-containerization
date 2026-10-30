@@ -1,0 +1,27 @@
+# Scenario A: app needs 45s to start, but startup probe only allows ~15s.
+# Kubelet kills and restarts it; logs show no application exception.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: startup-failure
+  namespace: probe-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: startup-failure}
+  template:
+    metadata:
+      labels: {app: startup-failure}
+    spec:
+      containers:
+        - name: app
+          image: jpalaparthi/go-probe-lab:v1
+          imagePullPolicy: IfNotPresent
+          ports: [{containerPort: 8080}]
+          env:
+            - {name: STARTUP_SECONDS, value: "45"}
+            - {name: READY_AFTER_SECONDS, value: "45"}
+          startupProbe:
+            httpGet: {path: /startup, port: 8080}
+            periodSeconds: 5
+            failureThreshold: 3
