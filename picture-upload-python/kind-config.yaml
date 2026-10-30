@@ -1,0 +1,12 @@
+# Replace __HOST_PICTURES_DIR__ with your laptop's absolute directory path.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    extraMounts:
+      - hostPath: __HOST_PICTURES_DIR__
+        containerPath: /data/pictures
+    extraPortMappings:
+      - containerPort: 30080
+        hostPort: 8080
+        protocol: TCP

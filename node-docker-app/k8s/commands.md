@@ -24,3 +24,4 @@ kubectl get all -n dev
 
 kubectl scale deployment node-demo --replicas=20 -n dev
 
+kubectl port-forward svc/node-demo-service 8080:3000 -n dev
