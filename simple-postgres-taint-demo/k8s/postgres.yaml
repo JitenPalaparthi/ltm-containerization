@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: postgres
+  namespace: taint-demo
+  labels:
+    app: postgres
+spec:
+  # Restrict PostgreSQL to the node labeled by scripts/run.sh.
+  nodeSelector:
+    workload: database
+  # Permit the database Pod onto that node's NoSchedule-tainted node.
+  tolerations:
+    - key: workload
+      operator: Equal
+      value: database
+      effect: NoSchedule
+    # Lets this lab also run on kind's single control-plane node.
+    # Keep this only for local learning clusters, not production workloads.
+    - key: node-role.kubernetes.io/control-plane
+      operator: Exists
+      effect: NoSchedule
+    - key: node-role.kubernetes.io/master
+      operator: Exists
+      effect: NoSchedule
+  securityContext:
+    # postgres:17-alpine uses the postgres group (GID 70); make emptyDir writable.
+    fsGroup: 70
+  containers:
+    - name: postgres
+      image: postgres:17-alpine
+      imagePullPolicy: IfNotPresent
+      ports:
+        - name: postgres
+          containerPort: 5432
+      env:
+        - name: POSTGRES_USER
+          value: labuser
+        - name: POSTGRES_DB
+          value: labdb
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-password
+              key: password
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+      readinessProbe:
+        exec:
+          command: ["sh", "-c", "pg_isready -U labuser -d labdb"]
+        initialDelaySeconds: 5
+        periodSeconds: 5
+      volumeMounts:
+        - name: pgdata
+          mountPath: /var/lib/postgresql/data
+  volumes:
+    - name: pgdata
+      emptyDir: {}

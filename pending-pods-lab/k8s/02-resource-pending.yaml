@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: resource-pending
+  namespace: pending-lab
+  labels:
+    app: pending-lab-demo
+spec:
+  containers:
+    - name: app
+      image: pending-pods-lab:local
+      imagePullPolicy: IfNotPresent
+      ports:
+        - containerPort: 8080
+      # Deliberately impossible on ordinary clusters to demonstrate FailedScheduling.
+      # This asks for 100,000 CPUs and 100,000 GiB of memory.
+      resources:
+        requests:
+          cpu: "100000"
+          memory: "100000Gi"

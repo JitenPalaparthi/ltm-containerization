@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cpu-stress-lab
+  labels:
+    app: cpu-stress-lab
+spec:
+  # A bounded run: do not retry if the container exits unsuccessfully.
+  backoffLimit: 0
+  activeDeadlineSeconds: 180
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        app: cpu-stress-lab
+    spec:
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: cpu-stress-lab
+          image: cpu-stress-lab:local
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: WORKERS
+              value: "8"
+            - name: DURATION
+              value: "60s"
+          resources:
+            requests:
+              cpu: "8"
+              memory: "32Mi"
+            limits:
+              cpu: "8"
+              memory: "128Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]

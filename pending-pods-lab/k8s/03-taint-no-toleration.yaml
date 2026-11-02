@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: taint-pending
+  namespace: pending-lab
+  labels:
+    app: pending-lab-demo
+spec:
+  nodeSelector:
+    lab.example.com/dedicated: pending-lab
+  containers:
+    - name: app
+      image: pending-pods-lab:local
+      imagePullPolicy: IfNotPresent
+      ports:
+        - containerPort: 8080
+      resources:
+        requests:
+          cpu: 25m
+          memory: 32Mi

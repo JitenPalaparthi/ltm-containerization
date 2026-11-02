@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pending-lab-app
+  namespace: pending-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pending-lab-app
+  template:
+    metadata:
+      labels:
+        app: pending-lab-app
+    spec:
+      containers:
+        - name: app
+          image: pending-pods-lab:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 250m
+              memory: 64Mi
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 1
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pending-lab-app
+  namespace: pending-lab
+spec:
+  selector:
+    app: pending-lab-app
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
